@@ -1,9 +1,10 @@
-DEMAND MODEL for PRICING HUB
+DYNAMIC PRICING PROJECT
 -
 by Eloi Cirera, Sergi Chimeno, Sara Marín from UBIQUM
----------------------------------------------------------------------
+  
+--------------------------------------------------------------------
 DESCRIPTION: 
-	Part1: Demand forecast from a time series using RandomForest instead of time series due having a not long enough data. 
+	Part1: Demand forecast from a time series using RandomForest and other regression models instead of time series due having a not long enough data. 
    
 ---------------------------------------------------------------------
 
