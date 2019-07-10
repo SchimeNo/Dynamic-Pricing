@@ -1,9 +1,10 @@
 DEMAND MODEL for PRICING HUB
-
+-
 by Eloi Cirera, Sergi Chimeno, Sara Marín from UBIQUM
-
-DESCRIPRION:  
-   Part1: Demand forecast from a time series using RandomForest instead of time series due having a not long enough data.
+---------------------------------------------------------------------
+DESCRIPTION: 
+	Part1: Demand forecast from a time series using RandomForest instead of time series due having a not long enough data. 
+   
 ---------------------------------------------------------------------
 
 BEFORE STARTING
