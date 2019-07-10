@@ -1,0 +1,34 @@
+####0. Libraries and directories####
+pacman::p_load(rstudioapi, h2o, dplyr, readr,  zoo,
+               lubridate,  caret, stringr)
+
+h2o.init() #start h2o
+
+#setting up directory
+current_path=getActiveDocumentContext()$path
+setwd(dirname(current_path))
+setwd("..")
+rm(current_path)
+
+#Load data (Time Series)
+time_series<-read_csv("./datasets/time_series_clean.csv")
+
+#Best model generated in DEMAND_MODEL
+BEST_MODEL<-readRDS("./datasets/BEST_MODEL.rds")
+
+
+#load the new feature Script and demand_prediction
+source("./scripts/01_FEATURE_CREATION_for_PricingHub.R")
+source("./scripts/03_DEMAND_PREDICTION_FUNCTION_for_PricingHub.R")
+#New Features
+time_series<-new_features(time_series) #Need to run Script 01_Feature_Creation
+
+
+#CHOOSE YEAR & MONTH TO PREDICT (DAY:numeric, MONTH:character, YEAR:numeric)
+#(01:Jan 02:Feb 03:Mar 04:Apr 05:May 06:Jun 07:Jul 08:Aug 09:Sep 10:Oct 11:Nov 12:Dec)
+
+#########################################
+PREDICTION<-demand_prediction(DAY=15, MONTH="Jul", YEAR=2019)
+#########################################
+
+PREDICTION
