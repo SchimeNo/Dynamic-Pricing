@@ -98,10 +98,11 @@ ERRORS THAT MAY HAPPEN:
 
 				time_frame<-as.data.frame(as.Date(seq(start_date+hours(1), by="day", len=n_future_days)))
 				
-2-Trying to predict a very far ahead date will give an error if time series hasn't been updated (we can predict 2 months ahead max more or less)
+2-Trying to predict a very far ahead date will give an error if time series hasn't been updated (we can predict 2 months ahead more or less)
 
 3- When using SMV or models not included in the H2O package the Date format may get changed to default.
 
-For any doubt, email: chimewallace@gmail.com
+---------------------------------------------------------------------
+For any doubts, email: chimewallace@gmail.com
 
 Thanks for reading.
