@@ -78,6 +78,14 @@ INPUT:
 	- DAY (numeric): The starting day you want the 28-day prediction to start. 
 	- MONTH (character): Manually put the specific month you want to predict. 
 	- YEAR (numeric): Manually put the year you want to predict.
+	- model_type (character): Select the model yo want to use for the prediction. 
+		Models Included currently:
+			"RF": RandomForest (h2o package)
+			"GBM": Gradient Boosting Machine (h2o package) 
+			"SVM_linear": Support Vector Machine linear kernel (e1071 package)
+			"DNN": Deeplearning (h2o package)
+			"prophet": Facebook's prophet forecasting (prophet package)
+			
 
 OUTPUT: 
 	- PREDICTION: Time Series data with the predicted demand of that MONTH. (If the time series has not been updated it may give you an error)
@@ -90,6 +98,8 @@ ERRORS THAT MAY HAPPEN:
 				start_date<-strptime(paste(DAY+1, MONTH_aux, YEAR),"%d %m %Y")
 				
 2-Trying to predict a very far ahead date will give an error if we haven't loaded the test data (we can predict 2 months ahead max more or less)
+
+3- When using SMV or models not included in the H2O package the Date format may get changed to default.
 
 For any doubt send an email to: chimewallace@gmail.com
 
