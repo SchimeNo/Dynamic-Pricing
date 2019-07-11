@@ -4,7 +4,8 @@ by Sergi Chimeno, Eloi Cirera, Sara Marín from UBIQUM
   
 --------------------------------------------------------------------
 DESCRIPTION: 
-	Part1: Demand forecast from a time series using RandomForest and other regression models instead of time series due having a not long enough data. 
+	
+Part1: Demand forecast from a time series using RandomForest and other regression models instead of time series due having a not long enough data. 
    
 ---------------------------------------------------------------------
 BEFORE STARTING
