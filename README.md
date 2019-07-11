@@ -94,9 +94,9 @@ OUTPUT:
 ---------------------------------------------------------------------
 ERRORS THAT MAY HAPPEN:
 
-1-Deppending on your system time the test dataset will start on day 1 or a day before, you may need to change IT on script 3 adding 1 or not to the DAY variable:
+1-Deppending on the system time zone, the predicted 28-day script 3 might return a start date some hours ahead or below (that's why we add +1 hour in this case)
 
-				start_date<-strptime(paste(DAY+1, MONTH_aux, YEAR),"%d %m %Y")
+				time_frame<-as.data.frame(as.Date(seq(start_date+hours(1), by="day", len=n_future_days)))
 				
 2-Trying to predict a very far ahead date will give an error if time series hasn't been updated (we can predict 2 months ahead max more or less)
 
