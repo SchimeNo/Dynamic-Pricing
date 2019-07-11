@@ -88,6 +88,7 @@ INPUT:
 			
 
 OUTPUT: 
+	
 	- PREDICTION: Time Series data with the predicted demand of that MONTH. (If the time series has not been updated it may give you an error)
 
 ---------------------------------------------------------------------
@@ -97,10 +98,10 @@ ERRORS THAT MAY HAPPEN:
 
 				start_date<-strptime(paste(DAY+1, MONTH_aux, YEAR),"%d %m %Y")
 				
-2-Trying to predict a very far ahead date will give an error if we haven't loaded the test data (we can predict 2 months ahead max more or less)
+2-Trying to predict a very far ahead date will give an error if time series hasn't been updated (we can predict 2 months ahead max more or less)
 
 3- When using SMV or models not included in the H2O package the Date format may get changed to default.
 
-For any doubt send an email to: chimewallace@gmail.com
+For any doubt, email: chimewallace@gmail.com
 
 Thanks for reading.
