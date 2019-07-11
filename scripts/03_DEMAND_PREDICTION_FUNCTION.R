@@ -1,8 +1,6 @@
 ####0. Libraries and directories####
 pacman::p_load(rstudioapi, h2o, dplyr, readr,  zoo,
-               lubridate,  caret, stringr)
-
-h2o.init() #start h2o
+               lubridate,  caret, stringr, prophet, e1071)
 
 #setting up directory
 current_path=getActiveDocumentContext()$path
@@ -21,24 +19,26 @@ source("./scripts/01_FEATURE_CREATION_for_PricingHub.R")
 #New Features
 time_series<-new_features(time_series) #Need to run Script 01_Feature_Creation
 
-YEAR<-2019
-MONTH<-"Apr"
-DAY<-28
+#to check if the code runs well internally
+# DAY=30
+# MONTH="Apr"
+# YEAR=2019
+# model_type = "SVM_radial"
 
 
 ####FUNCTION TO PREDICT DEMAND####
-demand_prediction<- function(DAY, MONTH, YEAR){
+demand_prediction<- function(DAY, MONTH, YEAR, model_type){
   
   #0.AUXILIAR VARIABLES
   MONTH_aux<-match(MONTH,month.abb)
   YEAR_aux<-(YEAR-2018)*12
-  start_date<-strptime(paste(DAY+1, MONTH_aux, YEAR),"%d %m %Y") #WARNING: Deppending on the system time might return one day ahead or not (change the 2 by 1 if future datafame doesn't start by day 1)
-  n_future_days<-28 #how many days ahead you want to predict
+  start_date<-strptime(paste(DAY, MONTH_aux, YEAR),"%d %m %Y") 
   PREDICTION<-data.frame()
+  n_future_days<-28 #how many days ahead you want to predict
   
   #1.CREATING EMPTY TEST DATA (time_frame)
   #Time series column with the dates 
-  time_frame<-as.data.frame(as.Date(seq(start_date, by="day", len=n_future_days))) #as.date advances the sequence one day that's why we set the starting day as the 2nd
+  time_frame<-as.data.frame(as.Date(seq(start_date+hours(1), by="day", len=n_future_days))) #WARNING: Deppending on the system time zone might return a start date some hours ahead or below (that's why we add +1 hour in this case)
   names(time_frame)[1]<-"ds" #rename date column
   
   #y empty column
@@ -62,10 +62,10 @@ demand_prediction<- function(DAY, MONTH, YEAR){
   x.indep <- c("diff","month","year","weekday","quarter","day","special_days", "month_no")
   
   if(MONTH_aux2!=MONTH_aux){
-    for(MONTH in c(MONTH_aux,MONTH_aux2) ){
+    for(MONTH_Loop in c(MONTH_aux,MONTH_aux2) ){
       
       #3. Selecting Best model (from BEST_MODEL.rds)#
-      selectedRows <- BEST_MODEL[grep(MONTH, BEST_MODEL$predicted_month_number), ]
+      selectedRows <- BEST_MODEL[grep(MONTH_Loop, BEST_MODEL$predicted_month_number), ]
       #(if we have more than one model, we will usually use the closest year model, so the last row)
       selectedRows<- selectedRows[nrow(selectedRows),]
       selectedRows
@@ -83,12 +83,37 @@ demand_prediction<- function(DAY, MONTH, YEAR){
       }
       train.h2o <- as.h2o(train) #Load it with h2o
       
-      test<-time_frame %>% filter(month==MONTH) #test data
+      test<-time_frame %>% filter(month==(MONTH_Loop)) #test data
       test.h2o<-as.h2o(test)
       
-      #Random Forest (or any other model)
-      model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123,min_rows = 2, max_depth = 10)
-      predict <- as.data.frame(h2o.predict(model, test.h2o))
+      #APPLYING MODEL CHOOSEN
+      if(model_type=="RF"){
+        model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123, max_depth = 10)
+      }else if(model_type=="GBM"){
+        model <- h2o.gbm(y = y.dep, x = x.indep, training_frame = train.h2o, ntrees = 5,  max_depth = 4,min_rows = 1,
+                         distribution= "poisson", histogram_type = "UniformAdaptive")
+      }else if(model_type=="DNN"){
+        model <- h2o.deeplearning(y = y.dep, x = x.indep, training_frame = train.h2o,seed = 123)
+      }else if(model_type=="SVM_linear"){
+        model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "linear", gamma = 1e-05, cost = 10)
+      }else if(model_type=="SVM_radial"){
+        model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "radial", gamma = 1e-05, cost = 10)
+      }else if (model_type=="prophet"){
+        m<-prophet(time_series[,c("ds","y")])
+        future <- test[,"ds"]
+        forecast <- predict(m, future)
+      }
+      
+      #Prediction (condition for if using h2o or not)
+      if(model_type=="SVM_linear"| model_type=="SVM_radial"){
+        predict <- predict(model, test)
+        print("SYSTEM DEFAULT DATE FORMATTING")
+      }else if(model_type=="prophet"){
+        predict<-forecast[,"trend"]
+        names(predict)[1]<-"y"
+      }else{
+        predict <- as.data.frame(h2o.predict(model, test.h2o))
+      }
       
       #FINAL RESULT
       PREDICTION<-rbind(PREDICTION,cbind(test$ds, predict))
@@ -110,22 +135,70 @@ demand_prediction<- function(DAY, MONTH, YEAR){
     test<-time_frame
     train.h2o <- as.h2o(train) #Load it with h2o
     test.h2o<-as.h2o(test)
-    #Random Forest (or any other model)
-    model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123,min_rows = 2, max_depth = 10)
-    predict <- as.data.frame(h2o.predict(model, test.h2o))
+    
+    
+    #APPLYING MODEL CHOOSEN
+    if(model_type=="RF"){
+      model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123, max_depth = 10, histogram_type="RoundRobin")
+    }else if(model_type=="GBM"){
+      model <- h2o.gbm(y = y.dep, x = x.indep, training_frame = train.h2o, ntrees = 5,  max_depth = 4,min_rows = 1,
+                       distribution= "poisson", histogram_type = "UniformAdaptive")
+    }else if(model_type=="DNN"){
+      model <- h2o.deeplearning(y = y.dep, x = x.indep, training_frame = train.h2o,seed = 123)
+    }else if(model_type=="SVM_linear"){
+      model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "linear", gamma = 1e-05, cost = 10)
+    }else if(model_type=="SVM_radial"){
+      model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "radial", gamma = 1e-05, cost = 10)
+    }else if (model_type=="prophet"){
+      m<-prophet(time_series[,c("ds","y")])
+      future <- test[,"ds"]
+      forecast <- predict(m, future)
+    }
+    
+    #Prediction (condition for if using h2o or not)
+    if(model_type=="SVM_linear"|model_type=="SVM_radial"){
+      predict <- predict(model, test)
+      print("SYSTEM DEFAULT DATE FORMATTING")
+    }else if(model_type=="prophet"){
+      predict<-forecast[,"trend"]
+      names(predict)[1]<-"y"
+    }else{
+      predict <- as.data.frame(h2o.predict(model, test.h2o))
+    }
     #FINAL RESULT
     PREDICTION<-cbind(test$ds, predict)
+    
   }
-  return(PREDICTION)
+  
+  #validation if we want to check our MAE
+  if(MONTH_aux+YEAR_aux<time_series[nrow(time_series),"month_no"]){
+    validation<- time_series[((time_series$day_month %in% time_frame$day_month) & ((time_series$year) %in% time_frame$year)),]
+    if(nrow(validation)==nrow(PREDICTION)){
+      a<-cbind(PREDICTION, validation$y)
+      b<-postResample(PREDICTION[,2], validation$y)
+      OUTPUT<-list(a,b)
+      return(OUTPUT)
+    }else{
+      print("VALIDATION NOT AVAILABLE (time_series data not available to compare with predicted)")
+      return(PREDICTION)
+    }
+    
+  }else{
+    return(PREDICTION)
+  }
 }
 
-####Validation to check results in already known months
-validation<- time_series[((time_series$day_month %in% time_frame$day_month) & ((time_series$year) %in% time_frame$year)),]
-cbind(PREDICTION, validation$y)
-postResample(PREDICTION[,2], validation$y)
 
-#OTHER MODELS
-#model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123,min_rows = 2, max_depth = 10)
-#model<-h2o.deeplearning(y=y.dep, x=x.indep, training_frame = train.h2o)
-#model <- h2o.gbm(y = y.dep, x = x.indep, training_frame = train.h2o, ntrees = 5, max_depth = 4,min_rows = 1,distribution= "poisson")
+# m<-prophet(train[,c("ds","y")])
+# future <- time_frame[,"ds"]
+# forecast <- predict(m, future)
+# predict<-forecast[,"trend"]
+# names(predict)[1]<-"y"
+# PREDICTION<-cbind(test$ds, predict)
+
+####Validation to check results in already known months
+# validation<- time_series[((time_series$day_month %in% time_frame$day_month) & ((time_series$year) %in% time_frame$year)),]
+# cbind(PREDICTION, validation$y)
+# postResample(PREDICTION[,2], validation$y)
+
 
