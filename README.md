@@ -1,13 +1,3 @@
-DEMAND FORECASTING
-Forecast properly the Demand of both Test & Control Group towards the definition of the expected Test
-  
---------------------------------------------------------------------
-
-BEFORE STARTING: May need to install and prepare your enviroment for the H2O package. 
-
-for more info visit:
-http://rpubs.com/Mentors_Ubiqum/H2O_wifi
-
 DYNAMIC PRICING PROJECT
 -
 by Sergi Chimeno, Eloi Cirera, Sara Marín from UBIQUM
