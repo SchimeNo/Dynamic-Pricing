@@ -1,22 +1,13 @@
-Forecasting & Modelling project 
-
-by UBIQUM Data Alaytics team
-Sara Marin, Sergi Chimeno, Eloi Cirera
-
-Building a Dynamic Pricing SaaS for Retailers focused on achieving their business objectives through Price Reco. built based on accurate price elasticity measurement through Machine Learning & Experimentation based methods.
-
-Forecast properly the Demand of both Test & Control Group towards the definition of the expected Test
-Experiment new models competing with the current one, logistic regression, leveraging Test vs Control experimentation method
-
----------------------------------------------------------------------
-
 DEMAND FORECASTING
+Forecast properly the Demand of both Test & Control Group towards the definition of the expected Test
+  
+--------------------------------------------------------------------
 
 BEFORE STARTING: May need to install and prepare your enviroment for the H2O package. 
 
 for more info visit:
 http://rpubs.com/Mentors_Ubiqum/H2O_wifi
-=======
+
 DYNAMIC PRICING PROJECT
 -
 by Sergi Chimeno, Eloi Cirera, Sara Marín from UBIQUM
