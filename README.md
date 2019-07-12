@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Forecasting & Modelling project 
 
 by UBIQUM Data Alaytics team
