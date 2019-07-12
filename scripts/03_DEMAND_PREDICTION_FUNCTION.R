@@ -1,6 +1,7 @@
 ####0. Libraries and directories####
 pacman::p_load(rstudioapi, h2o, dplyr, readr,  zoo,
                lubridate,  caret, stringr, prophet, e1071)
+h2o.init()
 
 #setting up directory
 current_path=getActiveDocumentContext()$path
@@ -19,11 +20,11 @@ source("./scripts/01_FEATURE_CREATION_for_PricingHub.R")
 #New Features
 time_series<-new_features(time_series) #Need to run Script 01_Feature_Creation
 
-#to check if the code runs well internally
-# DAY=30
+# #to check if the code runs well internally
+# DAY=1
 # MONTH="Apr"
 # YEAR=2019
-# model_type = "SVM_radial"
+# model_type = "RF"
 
 
 ####FUNCTION TO PREDICT DEMAND####
@@ -88,33 +89,37 @@ demand_prediction<- function(DAY, MONTH, YEAR, model_type){
       
       #APPLYING MODEL CHOOSEN
       if(model_type=="RF"){
-        model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123, max_depth = 10)
+        print("Random Forest")
+        model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 100, mtries = -1, seed = 123, max_depth = 10,min_rows = 2, histogram_type="RoundRobin")
       }else if(model_type=="GBM"){
+        print("GBM")
         model <- h2o.gbm(y = y.dep, x = x.indep, training_frame = train.h2o, ntrees = 5,  max_depth = 4,min_rows = 1,
                          distribution= "poisson", histogram_type = "UniformAdaptive")
       }else if(model_type=="DNN"){
+        print("DNN")
         model <- h2o.deeplearning(y = y.dep, x = x.indep, training_frame = train.h2o,seed = 123)
       }else if(model_type=="SVM_linear"){
+        print("SVM_linear")
         model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "linear", gamma = 1e-05, cost = 10)
       }else if(model_type=="SVM_radial"){
+        print("SVM_radial")
         model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "radial", gamma = 1e-05, cost = 10)
       }else if (model_type=="prophet"){
+        print("prophet")
         m<-prophet(time_series[,c("ds","y")])
         future <- test[,"ds"]
         forecast <- predict(m, future)
       }
       
       #Prediction (condition for if using h2o or not)
-      if(model_type=="SVM_linear"| model_type=="SVM_radial"){
+      if(model_type=="SVM_linear"|model_type=="SVM_radial"){
         predict <- predict(model, test)
-        print("SYSTEM DEFAULT DATE FORMATTING")
       }else if(model_type=="prophet"){
         predict<-forecast[,"trend"]
         names(predict)[1]<-"y"
       }else{
         predict <- as.data.frame(h2o.predict(model, test.h2o))
       }
-      
       #FINAL RESULT
       PREDICTION<-rbind(PREDICTION,cbind(test$ds, predict))
     }
@@ -139,17 +144,23 @@ demand_prediction<- function(DAY, MONTH, YEAR, model_type){
     
     #APPLYING MODEL CHOOSEN
     if(model_type=="RF"){
-      model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 1000, mtries = -1, seed = 123, max_depth = 10, histogram_type="RoundRobin")
+      print("Random Forest")
+      model <- h2o.randomForest(y=y.dep, x=x.indep,training_frame = train.h2o, ntrees = 100, mtries = -1, seed = 123, max_depth = 10,min_rows = 2, histogram_type="RoundRobin")
     }else if(model_type=="GBM"){
+      print("GBM")
       model <- h2o.gbm(y = y.dep, x = x.indep, training_frame = train.h2o, ntrees = 5,  max_depth = 4,min_rows = 1,
                        distribution= "poisson", histogram_type = "UniformAdaptive")
     }else if(model_type=="DNN"){
+      print("DNN")
       model <- h2o.deeplearning(y = y.dep, x = x.indep, training_frame = train.h2o,seed = 123)
     }else if(model_type=="SVM_linear"){
+      print("SVM_linear")
       model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "linear", gamma = 1e-05, cost = 10)
     }else if(model_type=="SVM_radial"){
+      print("SVM_radial")
       model<- svm(y~., data = train[,c("y",x.indep)],  kernel = "radial", gamma = 1e-05, cost = 10)
     }else if (model_type=="prophet"){
+      print("prophet")
       m<-prophet(time_series[,c("ds","y")])
       future <- test[,"ds"]
       forecast <- predict(m, future)
@@ -158,7 +169,6 @@ demand_prediction<- function(DAY, MONTH, YEAR, model_type){
     #Prediction (condition for if using h2o or not)
     if(model_type=="SVM_linear"|model_type=="SVM_radial"){
       predict <- predict(model, test)
-      print("SYSTEM DEFAULT DATE FORMATTING")
     }else if(model_type=="prophet"){
       predict<-forecast[,"trend"]
       names(predict)[1]<-"y"
@@ -201,4 +211,4 @@ demand_prediction<- function(DAY, MONTH, YEAR, model_type){
 # cbind(PREDICTION, validation$y)
 # postResample(PREDICTION[,2], validation$y)
 
-
+#train<-time_series %>% filter(month_no<16) 
