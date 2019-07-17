@@ -16,13 +16,12 @@ for more info visit:
 
 http://rpubs.com/Mentors_Ubiqum/H2O_wifi
 
->>>>>>> master
 ---------------------------------------------------------------------
 SCRIPTS DESCRIPTION
 
 All scripts should be in a folder called scripts and all data in a folder called datasets.
 
-<<<<<<< HEAD
+
 01_FEATURE_CREATION.R
 
 Contains new_feature function that will create the new features used in our project.
