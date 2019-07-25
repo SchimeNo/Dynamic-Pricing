@@ -21,26 +21,6 @@ SCRIPTS DESCRIPTION
 
 All scripts should be in a folder called scripts and all data in a folder called datasets.
 
-
-01_FEATURE_CREATION.R
-
-Contains new_feature function that will create the new features used in our project.
-
-	- DATE Variables: The date has been splitted by YEAR, QUARTER, MONTH, WEEK, WEEKDAY and DAY
-
-	- MONTH_NO: (numeric) feature counting the months. 
-
-	- DIFF: (numeric) increment of y of a day respect the previous day
-
-	- INCREMENT_YEAR: (numeric) increment of y respect the same day from the previous year
-
-	- ROLLMEANS: (numeric) Rolling means Feature (previous 7 days)
-
-	- SPECIAL_DAYS: (logic/binary) feature where 0=NORMAL / 1=SPECIAL DAY
-  			1 if the mean of the last 7 days is bigger than 7000 or 
-  			the difference between previous day is bigger than 2000
-
-=======
 ---------------------------------------------------------------------
 01_FEATURE_CREATION.R
 
@@ -58,13 +38,6 @@ Contains new_feature function that will create the new features used in our proj
 ---------------------------------------------------------------------
 02_MODEL_COMPETITION.R
 
-
-This is the heaviest script, it takes an average of 5 to 10 minutes to run, ideally you will only need to run it every year or 3-6 months to store and check the results of the new data updated. 
-
-INPUT: Time Series of demand (ds, y)
-
-OUTPUT:   
-=======
 This is the heaviest script, it takes an average of 5 to 10 minutes to run, ideally you will only need to run it every year or 3-6 months to store and check the results of the new data updated.
 
 INPUT: 	
@@ -76,14 +49,6 @@ OUTPUT:
 	- Results.rds: List that stores the results of all the models
 	- BEST_MODEL.rds: Dataframe with the optimal window model by month 
 
-
-DESCRIPTION: 
-
-Contains two for loops that trains the model deppending on the MONTH WE WANT TO PREDICT and the WINDOW OF MONTHS we used to train it. 
-
-	For example:  to predict February 19  it tries all combinations possible and BEST_MODEL stores the best one (with the lowest  MAE)
-
-=======
 DESCRIPTION:
 Contains two for loops that trains the model deppending on the MONTH WE WANT TO PREDICT and the WINDOW OF MONTHS we used to train it.
 For example:  to predict February 19  it tries all combinations possible and BEST_MODEL stores the best one (with the lowest  MAE)
@@ -112,24 +77,6 @@ It should return a time series with the demand by day.
 
 04_DEFINITIVE_MODEL.R
 
-This should be the main script used to predict the following 28 days.  
-Loads all the previous scripts and functions. 
-
-OUTPUT:
-=======
-Function that uses our optimal model (Random forest) to predict the following 28 days with the BEST_MODEL training window.
-
-INPUT:
-
-	- Time Series of demand (ds, y) (from 01-01-2018 to current date) 
-	- BEST_MODEL.rds - new_feature.R script 
-	
-
-First it will create an empty time series for the predicted month. Then it will look at the BEST_RESULT dataset to see which window of months work better, it will specify the window and then apply the model. It should return a time series with the demand by day.
-
----------------------------------------------------------------------
-04_DEFINITIVE_MODEL.R
-
 This should be the main script used to predict the following 28 days.
 Loads all the previous scripts and functions.
 
@@ -149,22 +96,11 @@ INPUT:
 
 OUTPUT: 
 	
-	- PREDICTION: Time Series data with the predicted demand of that MONTH. (If the time series has not been updated it may give you an error)
+	- PREDICTION: Time Series data with the predicted demand of the following 28 days. (If the time series has not been updated it may give you an error)
 
 ---------------------------------------------------------------------
 ERRORS THAT MAY HAPPEN:
-
-1-Deppending on your system time the test dataset will start on day 1 or a day before, you may need to change IT on script 3 adding 1 or not to the DAY variable:
-
-		start_date<-strptime(paste(DAY+1, MONTH_aux, YEAR),"%d %m %Y")
-
-2-Trying to predict a very far ahead date will give an error if we haven't loaded the test data (we can predict 2 months ahead max more or less)
-
-For any doubt send an email to: chimewallace@gmail.com
-
-Thanks for reading, 
   
-=======
 1-Deppending on the system time zone, the predicted 28-day script 3 might return a start date some hours ahead or below (that's why we add +1 hour in this case)
 
 				time_frame<-as.data.frame(as.Date(seq(start_date+hours(1), by="day", len=n_future_days)))
