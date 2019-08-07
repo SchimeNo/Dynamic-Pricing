@@ -35,6 +35,9 @@ Contains new_feature function that will create the new features used in our proj
 		1 if the mean of the last 7 days is bigger than 7000 or 
 		the difference between previous day is bigger than 2000
 	- HOLIDAYS: (numeric from [0-8]) giving a weight from 0 to 8 according the number of visits)
+
+NOTE: Some features cannot be used as predictors (like diff, increment_year or Rollmeans) if it's not a dynamic prediction (using the predicted to create new values), therefore have not been included in the model, but they were left here to help understand the behaviour of the data.
+
 ---------------------------------------------------------------------
 02_MODEL_COMPETITION.R
 
@@ -87,9 +90,11 @@ INPUT:
 	- YEAR (numeric): Manually put the year you want to predict.
 	- model_type (character): Select the model yo want to use for the prediction. 
 		Models Included currently:
-			"RF": RandomForest (h2o package)
+			"RF": Random Forest (h2o package)
+			"XRT": Extreme Random Forest (h2o package)
 			"GBM": Gradient Boosting Machine (h2o package) 
 			"SVM_linear": Support Vector Machine linear kernel (e1071 package)
+			"SVM_radial": Support Vector Machine radial kernel (e1071 package)
 			"DNN": Deeplearning (h2o package)
 			"prophet": Facebook's prophet forecasting (prophet package)
 			
