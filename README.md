@@ -4,7 +4,9 @@ by Sergi Chimeno, Eloi Cirera, Sara Marín from UBIQUM
   
 --------------------------------------------------------------------
 DESCRIPTION: 
-	
+
+Predicting the number of visits (demand) from a webstie or ecommerce for the next 28 days, having a dataset only of Date and Number of visits.
+
 Part1: Demand forecast from a time series using RandomForest and other regression models instead of time series due having a not long enough data. 
    
 ---------------------------------------------------------------------
