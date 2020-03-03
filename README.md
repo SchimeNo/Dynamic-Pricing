@@ -1,6 +1,6 @@
 DYNAMIC PRICING PROJECT
 -
-by Sergi Chimeno, Eloi Cirera, Sara Marín from UBIQUM
+by Sergi Chimeno, Eloi Cirera, Sara Marín 
   
 --------------------------------------------------------------------
 DESCRIPTION: 
